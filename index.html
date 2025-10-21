@@ -1,59 +1,91 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>我的笔记展示</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>线性代数笔记</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-light.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
   <style>
     body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.7;
-      margin: 40px;
-      max-width: 800px;
+      display: flex;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: #fafafa;
+    }
+    #sidebar {
+      width: 260px;
+      background: #fff;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      padding: 1rem;
+      height: 100vh;
+      overflow-y: auto;
     }
     #content {
-      white-space: pre-wrap;
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .markdown-body {
+      max-width: 900px;
+      margin: auto;
     }
   </style>
-
-  <!-- ✅ MathJax -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      },
-      svg: { fontCache: 'global' }
-    };
-  </script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-  </script>
-
-  <!-- ✅ 加载 Markdown 渲染库 -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
-
 <body>
-  <h1>📘 我的笔记展示</h1>
-  <select id="fileSelector">
-    <option value="线性代数-行列式.md">note1.md</option>
-    <option value="线性代数-线性空间与线性变换.md">note2.md</option>
-  </select>
-  <div id="content">加载中...</div>
+  <div id="sidebar">
+    <h2>📘 我的笔记</h2>
+    <ul id="fileList"></ul>
+  </div>
+  <div id="content" class="markdown-body">
+    <p>请选择左侧的笔记进行阅读。</p>
+  </div>
 
   <script>
-    async function loadMarkdown(file) {
-      const response = await fetch(file);
-      const text = await response.text();
-      const html = marked.parse(text);
-      document.getElementById('content').innerHTML = html;
-      if (window.MathJax) MathJax.typesetPromise();
-    }
+    const files = [
+      "线性代数-向量组的线性相关性.md",
+      "线性代数-相似矩阵及二次型.md",
+      "线性代数-矩阵及其运算.md",
+      "线性代数-矩阵的初等变换和线性方程组.md",
+      "线性代数-线性空间与线性变化.md",
+      "线性代数-行列式.md"
+    ];
 
-    // 初始加载第一个
-    const selector = document.getElementById('fileSelector');
-    loadMarkdown(selector.value);
-    selector.addEventListener('change', () => loadMarkdown(selector.value));
+    const fileList = document.getElementById("fileList");
+    const content = document.getElementById("content");
+
+    // 渲染目录
+    files.forEach(file => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = "#";
+      a.textContent = file.replace(".md", "");
+      a.onclick = () => loadMarkdown(file);
+      li.appendChild(a);
+      fileList.appendChild(li);
+    });
+
+    // 加载 markdown 并渲染
+    async function loadMarkdown(filename) {
+      const res = await fetch(filename);
+      const text = await res.text();
+      content.innerHTML = marked.parse(text, { breaks: true });
+      hljs.highlightAll();
+      MathJax.typesetPromise();
+      window.scrollTo(0, 0);
+    }
   </script>
 </body>
 </html>
